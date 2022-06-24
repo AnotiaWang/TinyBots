@@ -282,7 +282,7 @@ setInterval(() => {
     const now = Date.now();
     let count = 0;
     for (let key in data) {
-        if (now - data[key].time > 48 * 86400 * 1000) {
+        if (now - data[key].time > 2 * 86400 * 1000) {
             delete data[key];
             count++;
         }

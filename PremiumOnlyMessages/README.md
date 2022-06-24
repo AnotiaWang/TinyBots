@@ -15,7 +15,7 @@
 ## Variables
 
 - BOT_TOKEN: 机器人的 Token，可在 BotFather 处获得。
-- ADMIN_ID: 你的 UID，用于管理机器人上线状态（`/on` 或 `/off`）。
+- ADMIN_ID: 你的 UID，用于管理机器人上线状态 (`/on` 或 `/off`) 和查看数据 (`/stats`)。
 
 ## Demo
 
