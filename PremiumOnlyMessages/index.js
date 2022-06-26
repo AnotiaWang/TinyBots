@@ -108,6 +108,7 @@ bot.on("inline_query", async (ctx) => {
             for (let key in data) {
                 if (data[key].value === text) {
                     index = key;
+                    data[key].time = Date.now();
                 }
             }
             if (!index) {
@@ -117,16 +118,16 @@ bot.on("inline_query", async (ctx) => {
                     time: Date.now(),
                     user: userId
                 };
-                needsSaveData = true;
                 data.analytics.active++;
             }
+            needsSaveData = true;
 
             // 回应请求
             await ctx.answerInlineQuery([{
                 type: "article",
                 id: "premium",
                 title: "发送仅 Premium 用户可见的消息",
-                description: "48 小时后自毁",
+                description: "3 天后自毁",
                 input_message_content: {
                     message_text: "我发送了一条仅 Telegram Premium 用户可见的消息，点击下方按钮看看吧！",
                     disable_web_page_preview: true
@@ -138,24 +139,13 @@ bot.on("inline_query", async (ctx) => {
                 type: "article",
                 id: "non_premium",
                 title: "发送仅非 Premium 用户可见的消息",
-                description: "48 小时后自毁",
+                description: "3 天后自毁",
                 input_message_content: {
                     message_text: "我发送了一条仅非 Telegram Premium 用户可见的消息，点击下方按钮看看吧！",
                     disable_web_page_preview: true
                 },
                 reply_markup: {
                     inline_keyboard: keyboard.nonPremiumOnly(index)
-                }
-            }, {
-                type: "article",
-                id: "analytics",
-                title: "统计数据（可能有延迟）",
-                description: `有效消息：${data.analytics.active} 总查看数：${data.analytics.views}`,
-                input_message_content: {
-                    message_text: `有效消息：${data.analytics.active}\n总查看数：${data.analytics.views}`
-                },
-                reply_markup: {
-                    inline_keyboard: keyboard.again
                 }
             }], { cache_time: 0 });
             log(`${userId} 生成了一条消息 (${index})`);
@@ -177,9 +167,9 @@ bot.on("inline_query", async (ctx) => {
                 type: "article",
                 id: "analytics",
                 title: "统计数据（可能有延迟）",
-                description: `有效消息：${data.analytics.active} 总查看数：${data.analytics.views}`,
+                description: `${data.analytics.active} 条有效消息 | 共被查看 ${data.analytics.views} 次`,
                 input_message_content: {
-                    message_text: `有效消息：${data.analytics.active}\n总查看数：${data.analytics.views}`
+                    message_text: `统计数据：\n${data.analytics.active} 条有效消息\n总查看 ${data.analytics.views} 次`
                 },
                 reply_markup: {
                     inline_keyboard: keyboard.again
@@ -228,7 +218,7 @@ bot.on("callback_query", async (ctx) => {
             }
         }
         else {
-            await ctx.answerCbQuery("此消息发送已超过 48 小时，已失效。", { show_alert: true });
+            await ctx.answerCbQuery("此消息发送已超过 3 天，已失效。", { show_alert: true });
         }
     }
     catch (e) {
@@ -275,14 +265,14 @@ setInterval(() => {
         writeFileSync("./data_raw.json", JSON.stringify(data));
         writeFileSync("./data.json", JSON.stringify(data, null, 2));
     }
-}, 30 * 1000);
+}, 10 * 1000);
 
 // 自动清除过期数据
 setInterval(() => {
     const now = Date.now();
     let count = 0;
     for (let key in data) {
-        if (now - data[key].time > 2 * 86400 * 1000) {
+        if (now - data[key].time > 3 * 86400 * 1000) {
             delete data[key];
             count++;
         }
